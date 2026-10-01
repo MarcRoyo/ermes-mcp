@@ -1,0 +1,8 @@
+python-dotenv==1.1.1
+fastmcp==2.13.1
+pymilvus==2.6.5
+pymilvus[model]
+deltalake==1.2.1
+pyarrow==22.0.0
+pandas==2.3.2
+mcp==1.22.0
