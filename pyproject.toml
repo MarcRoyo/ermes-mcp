@@ -1,0 +1,19 @@
+[project]
+name = "ermes-mcp"
+version = "0.1.0"
+description = "Ermes MCP server"
+
+requires-python = ">=3.14,<3.15"
+
+dependencies = [
+    "python-dotenv==1.1.1",
+    "fastmcp==2.13.1",
+    "pymilvus[model]==2.6.5",
+    "deltalake==1.2.1",
+    "pyarrow==22.0.0",
+    "pandas==2.3.2",
+    "mcp==1.22.0",
+]
+
+[tool.poetry]
+package-mode = false

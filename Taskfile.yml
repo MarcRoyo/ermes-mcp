@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+tasks:
+  deps:lock:
+    desc: Update Poetry lock file
+    cmds:
+      - poetry lock
+
+  deps:install:
+    desc: Install Python dependencies
+    cmds:
+      - poetry install
+
+  check:
+    desc: Validate project dependencies
+    cmds:
+      - poetry check
+
+  prepare:
+    desc: Prepare MCP service for build
+    deps:
+      - deps:lock
+      - check

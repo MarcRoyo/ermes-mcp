@@ -1,48 +1,50 @@
-# Use an official Python runtime as a parent image
-FROM python:3.13-slim
+FROM python:3.14-slim
 
-# Install required packages for building eSpeak and general utilities
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
         build-essential \
         autoconf \
         automake \
         libtool \
-        pkg-config \ 
+        pkg-config \
         git \
-        cmake \ 
+        cmake \
         ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --upgrade pip 
+# Upgrade pip and install Poetry
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir poetry
 
-RUN mkdir -p cache && chmod 777 cache
-
+# Create non-root application user
 RUN useradd -m -u 1000 user
 
-USER user
-
-RUN mkdir -p /home/user/app/data
-
 ENV HOME=/home/user \
-	PATH=/home/user/.local/bin:$PATH
+    PATH=/home/user/.local/bin:/home/user/app/.venv/bin:$PATH \
+    POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_IN_PROJECT=true
 
-# Set the working directory to the user's home directory
-WORKDIR $HOME/app
-# Onnx install 
+WORKDIR /home/user/app
 
-COPY --chown=user requirements.txt $HOME/app/
+# Create application directories and assign ownership
+RUN mkdir -p \
+        /home/user/app/data \
+        /home/user/app/cache \
+    && chown -R user:user /home/user/app
 
-RUN pip install -r requirements.txt
-
-COPY --chown=user . $HOME/app/
-
-# Fix ownership issues
-USER root
-RUN chown -R user:user $HOME/app
 USER user
+
+# Copy dependency files first to improve Docker layer caching
+COPY --chown=user:user pyproject.toml poetry.lock ./
+
+# Install runtime dependencies
+RUN poetry install \
+    --only main \
+    --no-root
+
+# Copy application source
+COPY --chown=user:user . .
 
 EXPOSE 8182
 
-CMD ["python3", "-u", "MCPCustomServer.py"]
-
-
+CMD ["python", "-u", "MCPCustomServer.py"]
