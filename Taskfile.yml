@@ -19,7 +19,16 @@ tasks:
       - poetry check
 
   prepare:
-    desc: Prepare MCP service for build
-    deps:
-      - deps:lock
-      - check
+    desc: Prepare MCP server for build
+    cmds:
+      - |
+        if [ ! -f poetry.lock ]; then
+          echo "poetry.lock not found. Generating it..."
+          poetry lock
+        elif ! poetry check --lock >/dev/null 2>&1; then
+          echo "poetry.lock is out of date. Regenerating it..."
+          poetry lock
+        else
+          echo "poetry.lock is up to date."
+        fi
+      - poetry check
